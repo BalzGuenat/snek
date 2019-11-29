@@ -38,10 +38,20 @@ function step() {
 }
 
 function drawOverlay() {
+	if (ai_state.path.length == 0) return;
 	var c = document.getElementById('maze').getContext('2d');
-	c.fillStyle = 'gray';
-	c.font = "16px 'Press Start 2P'"
-	c.fillText('Overlay', 0, 20);
+	c.strokeStyle = 'gray';
+	c.lineWidth = 5;
+	c.beginPath();
+	var start = state.snake[0];
+	var sc = center(start.x, start.y);
+	c.moveTo(sc.x, sc.y);
+	for (var i = 0; i < ai_state.path.length; i++) {
+		var next = ai_state.path[i];
+		var nc = center(next.x, next.y);
+		c.lineTo(nc.x, nc.y);
+	}
+	c.stroke();
 }
 
 function aStar(start, goal) {
