@@ -2,14 +2,15 @@ window.addEventListener("DOMContentLoaded", main);
 window.addEventListener("keydown", process_input);
 
 maze_w = 20;
-maze_h = 10;
+maze_h = 11;
 cell_size = 0;
 state = {
-	snake: [{x: 3, y: 1}, {x: 2, y: 1}, {x: 1, y: 1}],
-	target: {x: 5, y: 5},
+	snake: [{x: 6, y: 5}, {x: 5, y: 5}, {x: 4, y: 5}],
+	target: {x: 14, y: 5},
 	board: [],
 	to_grow: 0,
-	game_over: false
+	game_over: false,
+	score: 0
 };
 changed = [];
 
@@ -38,7 +39,7 @@ function initState() {
 
 function drawMaze() {
 	var w = window.innerWidth * .95;
-	var h = window.innerHeight * .95;
+	var h = (window.innerHeight - 80) * .95;
 	cell_size = Math.floor(Math.min(w/maze_w, h/maze_h));
 
 	var maze = document.getElementById('maze');
@@ -88,6 +89,9 @@ function updateMaze() {
 	};
 	ctx.lineTo(end.x, end.y);
 	ctx.stroke();
+
+	var score = document.getElementById('score');
+	score.innerHTML = state.score;
 }
 
 function markCell(x, y, color) {
@@ -121,16 +125,20 @@ function process_input(e) {
 }
 
 function move(dx, dy) {
+	if (Math.abs(dx) + Math.abs(dy) != 1) {
+		console.log(`Refusing to move step (${dx},${dy}).`);
+		return false;		
+	}
 	var head = state.snake[0];
 	var newpos = {x:head.x + dx, y:head.y + dy};
 
 	if (newpos.x < 0 || newpos.x >= maze_w || newpos.y < 0 || newpos.y >= maze_h) {
 		console.log('Refusing to move off-grid.');
-		return;
+		return false;
 	}
 	if (state.board[newpos.x][newpos.y] == S_SNAKE) {
 		console.log('Refusing to move into tail.');
-		return;	
+		return false;
 	}
 
 	state.snake.unshift(newpos);
@@ -144,6 +152,7 @@ function move(dx, dy) {
 
 	if (state.board[newpos.x][newpos.y] == S_TARGET) {
 		state.to_grow += 2;
+		state.score += 1;
 		do {
 			newtarget = {x:getRandomInt(0, maze_w), y:getRandomInt(0, maze_h)};
 		} while (state.board[newtarget.x][newtarget.y] != S_NOTHING);
@@ -158,6 +167,8 @@ function move(dx, dy) {
 	checkGameOver();
 
 	updateMaze();
+	drawOverlay();
+	return true;
 }
 
 function getRandomInt(min, max) {

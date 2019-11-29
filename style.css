@@ -1,9 +1,9 @@
 body {
 	background-color: black;
+	color: gray;
 }
 
 #maze {
-	background-color: black;
 	border: 1px solid gray;
 }
 
@@ -17,4 +17,31 @@ body {
 
 table {
 	border-collapse: collapse;
+}
+
+#header {
+	font-family: 'Press Start 2P';
+	font-size: 32px;
+	text-transform: uppercase;
+	padding: .25em;
+}
+
+#header * {
+	display: inline-block;
+}
+
+button {
+	background-color: black;
+	color: gray;
+	border: 1px solid gray;
+	font-family: 'Press Start 2P';
+	padding: .25em;
+	font-size: 1em;
+	cursor: pointer;
+}
+
+button:active {
+	background-color: green;
+	color: black;
+	border-color: green;
 }
