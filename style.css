@@ -1,0 +1,19 @@
+body {
+	background-color: black;
+}
+
+#maze {
+	background-color: black;
+}
+
+.cell {	
+	border: 1px solid gray;
+}
+
+.cell * {
+	text-align: center;
+}
+
+table {
+	border-collapse: collapse;
+}
