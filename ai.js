@@ -1,4 +1,4 @@
-delay = 50;
+delay = 1;
 running = false;
 
 ai_state = {
@@ -23,25 +23,25 @@ function sleep(ms) {
 }
 
 function init() {
-	
+	ai_state.path = fillIn(hamilton(maze_w, maze_h));
+	while (!eq(ai_state.path[0], state.snake[0])) {
+		ai_state.path.push(ai_state.path.shift());
+	}
+	ai_state.path.push(ai_state.path.shift());
 }
 
 function step() {
-	if (ai_state.path.length == 0) {
-		ai_state.path = aStar(state.snake[0], state.target);
-		if (ai_state.path == null) return false;
-		// remove start
-		ai_state.path.shift();
-	}
 	var next = ai_state.path.shift();
+	ai_state.path.push(next);
 	return move(next.x - state.snake[0].x, next.y - state.snake[0].y);
 }
 
 function drawOverlay() {
+	return;
 	if (ai_state.path.length == 0) return;
 	var c = document.getElementById('maze').getContext('2d');
 	c.strokeStyle = 'gray';
-	c.lineWidth = 5;
+	c.lineWidth = 2;
 	c.beginPath();
 	var start = state.snake[0];
 	var sc = center(start.x, start.y);
@@ -125,4 +125,65 @@ class MapWithDefault extends Map {
 	get(key) {
 		return this.has(key) ? super.get(key) : Infinity;
 	}
+}
+
+function drawHamil() {
+	var p = hamilton(maze_w, maze_h);
+	var c = document.getElementById('maze').getContext('2d');
+	c.strokeStyle = 'gray';
+	c.lineWidth = 2;
+	c.beginPath();
+	var start = p[0];
+	var sc = center(start.x, start.y);
+	c.moveTo(sc.x, sc.y);
+	for (var i = 1; i < p.length; i++) {
+		var next = p[i];
+		var nc = center(next.x, next.y);
+		c.lineTo(nc.x, nc.y);
+	}
+	c.closePath();
+	c.stroke();
+}
+
+function hamilton(w, h) {
+	var cut = Math.floor((h-1)/2);
+	var p = [{x:0,y:0}];
+	for (var i = 1; i < w - 2; i += 2) {
+		p.push({x:i,y:0}, {x:i,y:cut}, {x:i+1,y:cut}, {x:i+1,y:0});
+	}
+
+	if (w % 2 == 0) {
+		p.push({x:w-1,y:0}, {x:w-1,y:h-1});
+	} else {
+		for (var i = 0; i < h - 3; i += 2) {
+			p.push({x:w-1,y:i}, {x:w-1,y:i+1}, {x:w-2,y:i+1}, {x:w-2,y:i+2});
+		}
+		p.push({x:w-1,y:h-2}, {x:w-1,y:h-1});
+	}
+
+	for (var i = w - 2 - w % 2; i > 1; i -= 2) {
+		p.push({x:i,y:h-1}, {x:i,y:cut+1}, {x:i-1,y:cut+1}, {x:i-1,y:h-1});
+	}
+	p.push({x:0,y:h-1});
+	return p;
+}
+
+function fillIn(p) {
+	p.push(p[0]);
+	for (var i = 0; i < p.length - 1; i++) {
+		toSplice = [];
+		var xsign = Math.sign(p[i+1].x - p[i].x);
+		for (var j = p[i].x + xsign; j*xsign < p[i+1].x*xsign; j += xsign) {
+			toSplice.push({x:j,y:p[i].y});
+		}
+		var ysign = Math.sign(p[i+1].y - p[i].y);
+		for (var j = p[i].y + ysign; j*ysign < p[i+1].y*ysign; j += ysign) {
+			toSplice.push({x:p[i].x,y:j});
+		}
+		var args = [i+1, 0].concat(toSplice);
+		Array.prototype.splice.apply(p, args);
+		i += toSplice.length;
+	}
+	p.pop();
+	return p;
 }
